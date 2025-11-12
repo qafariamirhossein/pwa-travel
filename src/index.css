@@ -26,7 +26,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -57,7 +57,51 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-foreground antialiased;
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Modern glassmorphism card */
+  .glass-card {
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 shadow-xl;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent;
+  }
+  
+  /* Smooth transitions */
+  .smooth-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  /* Enhanced shadow */
+  .shadow-glow {
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15), 0 0 0 1px rgba(59, 130, 246, 0.05);
+  }
+  
+  .shadow-glow-lg {
+    box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Travel-themed gradient backgrounds */
+  .gradient-travel-1 {
+    @apply bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500;
+  }
+  
+  .gradient-travel-2 {
+    @apply bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500;
+  }
+  
+  .gradient-travel-3 {
+    @apply bg-gradient-to-br from-orange-400 via-red-500 to-pink-500;
+  }
+  
+  .gradient-travel-4 {
+    @apply bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500;
   }
 }
 

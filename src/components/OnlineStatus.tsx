@@ -33,9 +33,9 @@ export function OnlineStatus() {
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
-          className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-yellow-900 px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2"
+          className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-yellow-500 to-orange-500 text-yellow-900 dark:text-yellow-100 px-4 py-3 text-center text-sm font-semibold flex items-center justify-center gap-2 shadow-lg backdrop-blur-sm"
         >
-          <WifiOff className="h-4 w-4" />
+          <WifiOff className="h-5 w-5" />
           <span>You're offline. Changes will sync when you reconnect.</span>
         </motion.div>
       )}
@@ -44,9 +44,9 @@ export function OnlineStatus() {
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
-          className="fixed top-0 left-0 right-0 z-50 bg-green-500 text-green-900 px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2"
+          className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-green-500 to-emerald-500 text-green-900 dark:text-green-100 px-4 py-3 text-center text-sm font-semibold flex items-center justify-center gap-2 shadow-lg backdrop-blur-sm"
         >
-          <Wifi className="h-4 w-4" />
+          <Wifi className="h-5 w-5" />
           <span>Back online. Syncing changes...</span>
         </motion.div>
       )}

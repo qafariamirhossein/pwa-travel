@@ -39,9 +39,9 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <OnlineStatus />
-        <main className="pb-16 md:pb-0">
+        <main className="pb-20 md:pb-0">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/trip/:id" element={<TripDetail />} />

@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { Edit, Trash2 } from 'lucide-react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { Edit, Trash2, ArrowLeft, MapPin, Calendar } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useTripStore, useItineraryStore, useExpenseStore, useNoteStore } from '@/store/useTripStore'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import ItineraryTab from '@/components/tabs/ItineraryTab'
 import MapTab from '@/components/tabs/MapTab'
 import BudgetTab from '@/components/tabs/BudgetTab'
 import NotesTab from '@/components/tabs/NotesTab'
+import { formatDate } from '@/lib/utils'
 
 export default function TripDetail() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { getTrip, deleteTrip } = useTripStore()
   const { fetchItems } = useItineraryStore()
   const { fetchExpenses } = useExpenseStore()
@@ -30,7 +34,13 @@ export default function TripDetail() {
   if (!trip) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div>Trip not found</div>
+        <Card className="p-12 text-center">
+          <h2 className="text-2xl font-bold mb-4">Trip not found</h2>
+          <Button onClick={() => navigate('/')} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Card>
       </div>
     )
   }
@@ -38,70 +48,154 @@ export default function TripDetail() {
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this trip? This action cannot be undone.')) {
       await deleteTrip(trip.id)
-      window.location.href = '/'
+      navigate('/')
     }
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <div className="relative h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg overflow-hidden mb-4">
-          {trip.coverPhoto ? (
-            <img
-              src={trip.coverPhoto}
-              alt={trip.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-white text-4xl font-bold">{trip.name}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{trip.name}</h1>
-            <p className="text-muted-foreground text-lg">{trip.destination}</p>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <div className="relative h-80 md:h-96 overflow-hidden">
+        {trip.coverPhoto ? (
+          <motion.img
+            src={trip.coverPhoto}
+            alt={trip.name}
+            className="w-full h-full object-cover"
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5 }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+            <h1 className="text-5xl md:text-6xl font-bold text-white drop-shadow-2xl">
+              {trip.name}
+            </h1>
           </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        
+        {/* Back Button */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="absolute top-4 left-4 z-10"
+        >
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => navigate('/')}
+            className="backdrop-blur-md bg-white/80 dark:bg-slate-900/80"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </motion.div>
 
-          <div className="flex gap-2">
-            <Link to={`/trip/${trip.id}/edit`}>
-              <Button variant="outline" size="icon">
-                <Edit className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Button variant="destructive" size="icon" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4" />
+        {/* Action Buttons */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="absolute top-4 right-4 z-10 flex gap-2"
+        >
+          <Link to={`/trip/${trip.id}/edit`}>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="backdrop-blur-md bg-white/80 dark:bg-slate-900/80"
+            >
+              <Edit className="h-5 w-5" />
             </Button>
-          </div>
+          </Link>
+          <Button
+            variant="destructive"
+            size="icon"
+            onClick={handleDelete}
+            className="backdrop-blur-md"
+          >
+            <Trash2 className="h-5 w-5" />
+          </Button>
+        </motion.div>
+
+        {/* Trip Info Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="max-w-4xl"
+          >
+            <h1 className="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">
+              {trip.name}
+            </h1>
+            <div className="flex flex-wrap items-center gap-4 text-lg">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="h-5 w-5 text-primary" />
+                <span className="font-semibold">{trip.destination}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="h-5 w-5 text-primary" />
+                <span>
+                  {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
+                </span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="itinerary">Itinerary</TabsTrigger>
-          <TabsTrigger value="map">Map</TabsTrigger>
-          <TabsTrigger value="budget">Budget</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
-        </TabsList>
+      {/* Tabs Section */}
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-6 bg-muted/50 backdrop-blur-sm p-1 rounded-xl">
+            <TabsTrigger 
+              value="itinerary" 
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+            >
+              Itinerary
+            </TabsTrigger>
+            <TabsTrigger 
+              value="map"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+            >
+              Map
+            </TabsTrigger>
+            <TabsTrigger 
+              value="budget"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+            >
+              Budget
+            </TabsTrigger>
+            <TabsTrigger 
+              value="notes"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+            >
+              Notes
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="itinerary">
-          <ItineraryTab tripId={trip.id} />
-        </TabsContent>
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <TabsContent value="itinerary" className="mt-0">
+              <ItineraryTab tripId={trip.id} />
+            </TabsContent>
 
-        <TabsContent value="map">
-          <MapTab tripId={trip.id} destination={trip.destination} />
-        </TabsContent>
+            <TabsContent value="map" className="mt-0">
+              <MapTab tripId={trip.id} destination={trip.destination} />
+            </TabsContent>
 
-        <TabsContent value="budget">
-          <BudgetTab tripId={trip.id} />
-        </TabsContent>
+            <TabsContent value="budget" className="mt-0">
+              <BudgetTab tripId={trip.id} />
+            </TabsContent>
 
-        <TabsContent value="notes">
-          <NotesTab tripId={trip.id} />
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="notes" className="mt-0">
+              <NotesTab tripId={trip.id} />
+            </TabsContent>
+          </motion.div>
+        </Tabs>
+      </div>
     </div>
   )
 }

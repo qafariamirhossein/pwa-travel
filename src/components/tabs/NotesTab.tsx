@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Save } from 'lucide-react'
+import { Plus, Trash2, Save, Edit2, FileText } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNoteStore } from '@/store/useTripStore'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -66,23 +67,43 @@ export default function NotesTab({ tripId }: NotesTabProps) {
   }
 
   if (loading) {
-    return <div>Loading notes...</div>
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto animate-spin" />
+          <p className="text-muted-foreground">Loading notes...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Notes</h2>
-        <Button onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-4 w-4 mr-2" />
+        <div>
+          <h2 className="text-3xl font-bold gradient-text mb-1">Notes</h2>
+          <p className="text-muted-foreground">Capture your thoughts and memories</p>
+        </div>
+        <Button onClick={() => setShowForm(!showForm)} size="lg">
+          <Plus className="h-5 w-5 mr-2" />
           {editingId ? 'Edit Note' : 'New Note'}
         </Button>
       </div>
 
-      {showForm && (
-        <Card>
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+      <AnimatePresence>
+        {showForm && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <Card className="glass-card border-2">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  {editingId ? 'Edit Note' : 'Create New Note'}
+                </h3>
+                <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="date">Date (optional)</Label>
                 <input
@@ -118,52 +139,78 @@ export default function NotesTab({ tripId }: NotesTabProps) {
             </form>
           </CardContent>
         </Card>
-      )}
+      </motion.div>
+        )}
+      </AnimatePresence>
 
       {notes.length === 0 ? (
-        <Card>
+        <Card className="glass-card border-2 border-dashed">
           <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">No notes yet. Create your first note!</p>
+            <div className="text-6xl mb-4">📝</div>
+            <p className="text-muted-foreground text-lg">
+              No notes yet. Create your first note to capture your memories!
+            </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {notes.map((note) => (
-            <Card key={note.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    {note.date && (
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {new Date(note.date).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
+          {notes.map((note, index) => (
+            <motion.div
+              key={note.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className="glass-card hover:shadow-lg transition-all duration-200">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4 pb-4 border-b border-border/50">
+                    <div className="flex-1">
+                      {note.date && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-semibold text-primary">
+                            {new Date(note.date).toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Last updated: {new Date(note.updatedAt).toLocaleString('en-US', {
+                          month: 'short',
                           day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      Updated: {new Date(note.updatedAt).toLocaleString()}
-                    </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(note)}
+                        className="hover:bg-primary/10 hover:text-primary"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteNote(note.id)}
+                        className="hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(note)}>
-                      <Save className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteNote(note.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-bold prose-p:text-foreground prose-strong:text-foreground prose-a:text-primary">
+                    <ReactMarkdown>{note.content}</ReactMarkdown>
                   </div>
-                </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <ReactMarkdown>{note.content}</ReactMarkdown>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       )}
