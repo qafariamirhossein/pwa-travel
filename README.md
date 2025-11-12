@@ -149,6 +149,35 @@ yarn preview
 pnpm preview
 ```
 
+### 7. Deploy to Vercel
+
+The project is configured for easy deployment on Vercel:
+
+1. **Install Vercel CLI** (optional, for local deployment):
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Deploy via Vercel Dashboard**:
+   - Push your code to GitHub/GitLab/Bitbucket
+   - Go to [vercel.com](https://vercel.com) and import your repository
+   - Vercel will automatically detect the Vite framework
+   - Add environment variables in the Vercel dashboard:
+     - `VITE_SUPABASE_URL` - Your Supabase project URL
+     - `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous key
+   - Click "Deploy"
+
+3. **Deploy via CLI**:
+   ```bash
+   vercel
+   ```
+   Follow the prompts and add environment variables when asked.
+
+**Note**: The `vercel.json` configuration file is already set up with:
+- SPA routing (all routes serve `index.html`)
+- Proper caching headers for PWA assets
+- Service worker configuration
+
 ## Project Structure
 
 ```
