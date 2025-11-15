@@ -16,209 +16,176 @@ A Progressive Web App (PWA) for planning, organizing, and managing trips. Works 
 - **Frontend**: React 18 + Vite + TypeScript
 - **UI**: Tailwind CSS + ShadCN UI + Framer Motion
 - **Offline Storage**: IndexedDB (via localForage)
-- **Backend**: Supabase (auth, database, storage)
+- **Backend**: Generic REST API (works with any serverless Postgres)
 - **Maps**: Leaflet with OpenStreetMap tiles
 - **PWA**: Workbox + Vite PWA Plugin
 
 ## Prerequisites
 
 - Node.js 18+ and npm/yarn/pnpm
-- A Supabase account (optional - app works offline without it)
+- A backend API with Postgres database (optional - app works offline without it)
 
-## Setup Instructions
+## Quick Start
 
-### 1. Clone and Install
+### Option 1: Run Everything Together (Recommended for Development)
 
 ```bash
 # Install dependencies
 npm install
-# or
-yarn install
-# or
-pnpm install
+
+# Set up your database connection string
+echo "DATABASE_URL=postgresql://user:password@host:port/database" >> .env
+
+# Initialize database
+npm run init-db
+
+# Run both frontend and backend together
+npm run dev:all
+```
+
+This starts:
+- Backend API on `http://localhost:3000`
+- Frontend on `http://localhost:5173`
+- Vite automatically proxies `/api/*` requests to the backend
+
+### Option 2: Run Separately
+
+**Terminal 1 - Backend:**
+```bash
+npm run dev:server
+```
+
+**Terminal 2 - Frontend:**
+```bash
+npm run dev
+```
+
+## Setup Instructions
+
+### 1. Install Dependencies
+
+```bash
+npm install
 ```
 
 ### 2. Configure Environment Variables
 
-Copy `.env.example` to `.env` and fill in your Supabase credentials:
+Create a `.env` file in the root directory:
 
 ```bash
-cp .env.example .env
+touch .env
 ```
 
-Edit `.env`:
+**For Development (with Vite proxy):**
 ```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+DATABASE_URL=postgresql://user:password@host:port/database
+# VITE_API_URL is optional in dev - Vite will proxy /api/* to backend
 ```
 
-**Note**: The app works fully offline without Supabase. If you don't provide credentials, the app will function in offline-only mode.
-
-### 3. Set Up Supabase (Optional)
-
-If you want cloud sync, create the following tables in your Supabase project:
-
-#### Trips Table
-```sql
-CREATE TABLE trips (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  destination TEXT NOT NULL,
-  start_date TIMESTAMPTZ NOT NULL,
-  end_date TIMESTAMPTZ NOT NULL,
-  cover_photo TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  user_id UUID REFERENCES auth.users(id)
-);
+**For Production:**
+```env
+DATABASE_URL=postgresql://user:password@host:port/database
+VITE_API_URL=https://your-api-url.com
 ```
 
-#### Itinerary Items Table
-```sql
-CREATE TABLE itinerary_items (
-  id TEXT PRIMARY KEY,
-  trip_id TEXT REFERENCES trips(id) ON DELETE CASCADE,
-  date DATE NOT NULL,
-  time TIME,
-  title TEXT NOT NULL,
-  location TEXT,
-  notes TEXT,
-  "order" INTEGER NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
+**Note**: The app works fully offline without an API. If you don't provide an API URL, the app will function in offline-only mode.
 
-#### Expenses Table
-```sql
-CREATE TABLE expenses (
-  id TEXT PRIMARY KEY,
-  trip_id TEXT REFERENCES trips(id) ON DELETE CASCADE,
-  category TEXT NOT NULL,
-  amount DECIMAL NOT NULL,
-  currency TEXT NOT NULL DEFAULT 'USD',
-  note TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
+### 3. Initialize Database
 
-#### Notes Table
-```sql
-CREATE TABLE notes (
-  id TEXT PRIMARY KEY,
-  trip_id TEXT REFERENCES trips(id) ON DELETE CASCADE,
-  date DATE,
-  content TEXT NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### 4. Run Development Server
+Run the database initialization script:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+npm run init-db
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+This creates all required tables in your Postgres database.
+
+### 4. Start Development
+
+**Run both together:**
+```bash
+npm run dev:all
+```
+
+**Or run separately:**
+```bash
+# Terminal 1
+npm run dev:server
+
+# Terminal 2  
+npm run dev
+```
 
 ### 5. Build for Production
 
 ```bash
 npm run build
-# or
-yarn build
-# or
-pnpm build
 ```
 
 The built files will be in the `dist` directory.
 
-### 6. Preview Production Build
+## Development Workflow
 
-```bash
-npm run preview
-# or
-yarn preview
-# or
-pnpm preview
-```
+### Running Both Services
 
-### 7. Deploy to Vercel
+The easiest way is to use `npm run dev:all` which runs both frontend and backend together:
 
-The project is configured for easy deployment on Vercel:
+- **Backend API**: `http://localhost:3000`
+- **Frontend**: `http://localhost:5173`
+- **API Proxy**: Vite automatically proxies `/api/*` to `http://localhost:3000`
 
-1. **Install Vercel CLI** (optional, for local deployment):
+In development, you don't need to set `VITE_API_URL` - the frontend uses relative URLs that Vite proxies to the backend.
+
+### Running Separately
+
+If you prefer to run them separately:
+
+1. **Backend** (Terminal 1):
    ```bash
-   npm i -g vercel
+   npm run dev:server
    ```
 
-2. **Deploy via Vercel Dashboard**:
-   - Push your code to GitHub/GitLab/Bitbucket
-   - Go to [vercel.com](https://vercel.com) and import your repository
-   - Vercel will automatically detect the Vite framework
-   - Add environment variables in the Vercel dashboard:
-     - `VITE_SUPABASE_URL` - Your Supabase project URL
-     - `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous key
-   - Click "Deploy"
-
-3. **Deploy via CLI**:
+2. **Frontend** (Terminal 2):
    ```bash
-   vercel
+   npm run dev
    ```
-   Follow the prompts and add environment variables when asked.
 
-**Note**: The `vercel.json` configuration file is already set up with:
-- SPA routing (all routes serve `index.html`)
-- Proper caching headers for PWA assets
-- Service worker configuration
+3. Set `VITE_API_URL=http://localhost:3000` in `.env` if running separately
 
 ## Project Structure
 
 ```
 pwa-travel/
-├── public/                 # Static assets and PWA icons
+├── server/              # Backend API server
+│   ├── index.ts        # Express server
+│   └── README.md       # Server documentation
+├── public/             # Static assets and PWA icons
 ├── src/
-│   ├── components/         # React components
-│   │   ├── ui/            # ShadCN UI components
-│   │   ├── tabs/          # Feature tab components
-│   │   ├── BottomNav.tsx  # Bottom navigation
-│   │   └── OnlineStatus.tsx # Online/offline indicator
-│   ├── lib/               # Utilities and services
-│   │   ├── db.ts          # IndexedDB operations
-│   │   ├── sync.ts        # Sync manager
-│   │   ├── supabase.ts    # Supabase client
-│   │   └── utils.ts       # Helper functions
-│   ├── pages/             # Page components
-│   │   ├── Dashboard.tsx
-│   │   ├── TripDetail.tsx
-│   │   ├── TripEdit.tsx
-│   │   ├── NewTrip.tsx
-│   │   └── Settings.tsx
-│   ├── store/             # Zustand stores
-│   │   └── useTripStore.ts
-│   ├── types/             # TypeScript types
-│   │   └── index.ts
-│   ├── App.tsx            # Main app component
-│   ├── main.tsx           # Entry point
-│   └── index.css          # Global styles
-├── index.html
+│   ├── components/     # React components
+│   │   ├── ui/        # ShadCN UI components
+│   │   ├── tabs/      # Feature tab components
+│   │   ├── BottomNav.tsx
+│   │   └── OnlineStatus.tsx
+│   ├── lib/           # Utilities and services
+│   │   ├── db.ts      # IndexedDB operations
+│   │   ├── db-api.ts  # Database API client
+│   │   ├── sync.ts    # Sync manager
+│   │   └── utils.ts    # Helper functions
+│   ├── pages/         # Page components
+│   ├── store/         # Zustand stores
+│   ├── types/         # TypeScript types
+│   ├── App.tsx        # Main app component
+│   └── main.tsx       # Entry point
+├── scripts/
+│   └── init-db.ts     # Database initialization
 ├── package.json
-├── tsconfig.json
-├── tailwind.config.js
-├── vite.config.ts
 └── README.md
 ```
 
 ## Offline & Sync Behavior
 
 - **Offline**: All data is stored in IndexedDB. The app works fully offline.
-- **Online**: When connected, changes are synced with Supabase automatically.
+- **Online**: When connected, changes are synced with your backend API automatically.
 - **Sync Queue**: Changes made offline are queued and synced when back online.
 - **Background Sync**: Automatic sync runs every 30 seconds when online.
 
@@ -228,47 +195,32 @@ pwa-travel/
 2. **Safari (iOS)**: Tap Share → "Add to Home Screen"
 3. **Firefox**: Menu → "Install"
 
-## PWA Icons
+## Deployment
 
-**Important**: Replace the placeholder icon files in `public/` with actual icons:
+### Frontend (Vercel, Netlify, etc.)
 
-- `pwa-192x192.png` - 192x192px icon
-- `pwa-512x512.png` - 512x512px icon  
-- `apple-touch-icon.png` - 180x180px for iOS
+Deploy the `dist` folder after running `npm run build`. Set `VITE_API_URL` to your backend API URL.
 
-You can generate these from a single source image using tools like:
-- [PWA Asset Generator](https://github.com/elegantapp/pwa-asset-generator)
-- [RealFaviconGenerator](https://realfavicongenerator.net/)
+### Backend (Railway, Render, Fly.io, etc.)
 
-## Development
-
-### Adding New Features
-
-1. Create components in `src/components/`
-2. Add routes in `src/App.tsx`
-3. Update stores in `src/store/` if needed
-4. Add types in `src/types/index.ts`
-
-### Code Style
-
-- TypeScript strict mode enabled
-- ESLint configured
-- Prettier recommended (add if needed)
+Deploy the `server/` folder. Set `DATABASE_URL` environment variable in your hosting platform.
 
 ## Troubleshooting
+
+### API Sync Not Working
+
+- Verify `.env` file has correct `DATABASE_URL`
+- Check your backend API is running (`npm run dev:server`)
+- In development, make sure you're using `npm run dev:all` or have the proxy configured
+- Review browser console for API errors
+- Ensure your backend API implements the required endpoints
+- App works offline even without an API
 
 ### Service Worker Not Registering
 
 - Ensure you're running on `http://localhost` (not `file://`)
 - Check browser console for errors
 - Clear browser cache and reload
-
-### Supabase Sync Not Working
-
-- Verify `.env` file has correct credentials
-- Check Supabase project is active
-- Review browser console for API errors
-- App works offline even without Supabase
 
 ### Map Not Loading
 
@@ -283,4 +235,3 @@ MIT
 ## Contributing
 
 Contributions welcome! Please open an issue or submit a pull request.
-

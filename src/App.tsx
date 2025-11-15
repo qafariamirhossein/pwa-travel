@@ -9,6 +9,9 @@ import TripDetail from '@/pages/TripDetail'
 import TripEdit from '@/pages/TripEdit'
 import NewTrip from '@/pages/NewTrip'
 import Settings from '@/pages/Settings'
+import MapPage from '@/pages/MapPage'
+import BudgetPage from '@/pages/BudgetPage'
+import NotesPage from '@/pages/NotesPage'
 
 function App() {
   const fetchTrips = useTripStore((state) => state.fetchTrips)
@@ -38,7 +41,12 @@ function App() {
   }, [fetchTrips])
 
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <div className="min-h-screen">
         <OnlineStatus />
         <main className="pb-20 md:pb-0">
@@ -48,6 +56,9 @@ function App() {
             <Route path="/trip/:id/edit" element={<TripEdit />} />
             <Route path="/new-trip" element={<NewTrip />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/budget" element={<BudgetPage />} />
+            <Route path="/notes" element={<NotesPage />} />
           </Routes>
         </main>
         <BottomNav />

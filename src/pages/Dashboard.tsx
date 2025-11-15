@@ -56,7 +56,7 @@ export default function Dashboard() {
       totalTrips: trips.length,
       upcomingTrips: upcoming.length,
       ongoingTrips: ongoing.length,
-      totalDays,
+      totalDays: isNaN(totalDays) ? 0 : totalDays,
       nextTrip,
     })
   }, [trips])
@@ -129,7 +129,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Total Trips</p>
-                    <p className="text-3xl font-bold">{stats.totalTrips}</p>
+                    <p className="text-3xl font-bold">{isNaN(stats.totalTrips) ? 0 : stats.totalTrips}</p>
                   </div>
                   <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                     <Globe className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -143,7 +143,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Upcoming</p>
-                    <p className="text-3xl font-bold">{stats.upcomingTrips}</p>
+                    <p className="text-3xl font-bold">{isNaN(stats.upcomingTrips) ? 0 : stats.upcomingTrips}</p>
                   </div>
                   <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                     <Plane className="h-6 w-6 text-purple-600 dark:text-purple-400" />
@@ -157,7 +157,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Ongoing</p>
-                    <p className="text-3xl font-bold">{stats.ongoingTrips}</p>
+                    <p className="text-3xl font-bold">{isNaN(stats.ongoingTrips) ? 0 : stats.ongoingTrips}</p>
                   </div>
                   <div className="w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
                     <Clock className="h-6 w-6 text-pink-600 dark:text-pink-400" />
@@ -171,7 +171,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Total Days</p>
-                    <p className="text-3xl font-bold">{stats.totalDays}</p>
+                    <p className="text-3xl font-bold">{isNaN(stats.totalDays) ? 0 : stats.totalDays}</p>
                   </div>
                   <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
                     <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />

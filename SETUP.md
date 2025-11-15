@@ -25,15 +25,24 @@ Create a `.env` file in the root directory:
 
 ```bash
 # Copy this content to .env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_API_URL=https://your-api-url.com
 ```
 
-### 3. Set Up Supabase
+### 3. Set Up Backend API and Database
 
-1. Go to [supabase.com](https://supabase.com) and create a free account
-2. Create a new project
-3. Go to SQL Editor and run these scripts:
+1. Set up a serverless Postgres database (e.g., Neon, Railway, Vercel Postgres, etc.)
+2. Get your Postgres connection string
+3. Set up a backend API that connects to your Postgres database using the connection string
+4. The backend should implement REST endpoints (see README.md for details)
+5. Initialize your database by running:
+
+```bash
+npm run init-db
+```
+
+This will create the required tables. The script uses `DATABASE_URL` or `SUPABASE_DB_URL` from your `.env` file.
+
+Alternatively, you can manually create the tables using SQL:
 
 #### Create Trips Table
 ```sql
@@ -92,8 +101,8 @@ CREATE TABLE notes (
 );
 ```
 
-4. Get your project URL and anon key from Project Settings → API
-5. Add them to `.env`
+4. Make sure your backend API is running and accessible
+5. Add the API URL to `.env` as `VITE_API_URL`
 
 ### 4. Replace PWA Icons
 
@@ -124,11 +133,12 @@ npm run preview
 - Clear browser cache if issues persist
 - Check browser console for errors
 
-### Supabase Sync Not Working
-- Verify `.env` file exists and has correct values
-- Check Supabase project is active
+### API Sync Not Working
+- Verify `.env` file exists and has correct `VITE_API_URL`
+- Check your backend API is running and accessible
+- Ensure your backend implements the required REST endpoints
 - Review browser console for API errors
-- App works offline even without Supabase
+- App works offline even without an API
 
 ### Map Not Loading
 - Requires internet for initial tile load

@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { dbApi } from './db-api'
 import { tripDB, itineraryDB, expenseDB, noteDB, syncQueueDB } from './db'
 import type { Trip, ItineraryItem, Expense, Note, SyncQueueItem } from '@/types'
 import { generateId } from './utils'
@@ -11,10 +11,10 @@ export class SyncManager {
       return
     }
 
-    // Check if Supabase is configured
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-    if (!supabaseUrl) {
-      console.log('Supabase not configured. Running in offline mode only.')
+    // Check if API URL is configured
+    const apiUrl = import.meta.env.VITE_API_URL
+    if (!apiUrl) {
+      console.log('API URL not configured. Running in offline mode only.')
       return
     }
 
@@ -72,9 +72,7 @@ export class SyncManager {
     const { data, action } = item
 
     if (action === 'create' || action === 'update') {
-      const { error } = await supabase
-        .from('trips')
-        .upsert(data, { onConflict: 'id' })
+      const { error } = await dbApi.upsertTrip(data)
 
       if (!error) {
         await tripDB.set(data)
@@ -82,7 +80,7 @@ export class SyncManager {
         throw error
       }
     } else if (action === 'delete') {
-      const { error } = await supabase.from('trips').delete().eq('id', data.id)
+      const { error } = await dbApi.deleteTrip(data.id)
       if (!error) {
         await tripDB.delete(data.id)
       } else {
@@ -95,9 +93,7 @@ export class SyncManager {
     const { data, action } = item
 
     if (action === 'create' || action === 'update') {
-      const { error } = await supabase
-        .from('itinerary_items')
-        .upsert(data, { onConflict: 'id' })
+      const { error } = await dbApi.upsertItineraryItem(data)
 
       if (!error) {
         await itineraryDB.set(data)
@@ -105,7 +101,7 @@ export class SyncManager {
         throw error
       }
     } else if (action === 'delete') {
-      const { error } = await supabase.from('itinerary_items').delete().eq('id', data.id)
+      const { error } = await dbApi.deleteItineraryItem(data.id)
       if (!error) {
         await itineraryDB.delete(data.id)
       } else {
@@ -118,9 +114,7 @@ export class SyncManager {
     const { data, action } = item
 
     if (action === 'create' || action === 'update') {
-      const { error } = await supabase
-        .from('expenses')
-        .upsert(data, { onConflict: 'id' })
+      const { error } = await dbApi.upsertExpense(data)
 
       if (!error) {
         await expenseDB.set(data)
@@ -128,7 +122,7 @@ export class SyncManager {
         throw error
       }
     } else if (action === 'delete') {
-      const { error } = await supabase.from('expenses').delete().eq('id', data.id)
+      const { error } = await dbApi.deleteExpense(data.id)
       if (!error) {
         await expenseDB.delete(data.id)
       } else {
@@ -141,9 +135,7 @@ export class SyncManager {
     const { data, action } = item
 
     if (action === 'create' || action === 'update') {
-      const { error } = await supabase
-        .from('notes')
-        .upsert(data, { onConflict: 'id' })
+      const { error } = await dbApi.upsertNote(data)
 
       if (!error) {
         await noteDB.set(data)
@@ -151,7 +143,7 @@ export class SyncManager {
         throw error
       }
     } else if (action === 'delete') {
-      const { error } = await supabase.from('notes').delete().eq('id', data.id)
+      const { error } = await dbApi.deleteNote(data.id)
       if (!error) {
         await noteDB.delete(data.id)
       } else {
@@ -161,7 +153,7 @@ export class SyncManager {
   }
 
   private async syncTrips(): Promise<void> {
-    const { data, error } = await supabase.from('trips').select('*').order('updated_at', { ascending: false })
+    const { data, error } = await dbApi.getTrips()
 
     if (error) {
       console.error('Error syncing trips:', error)
@@ -178,11 +170,7 @@ export class SyncManager {
   private async syncItineraryItems(): Promise<void> {
     const trips = await tripDB.getAll()
     for (const trip of trips) {
-      const { data, error } = await supabase
-        .from('itinerary_items')
-        .select('*')
-        .eq('trip_id', trip.id)
-        .order('order', { ascending: true })
+      const { data, error } = await dbApi.getItineraryItems(trip.id)
 
       if (error) {
         console.error('Error syncing itinerary items:', error)
@@ -200,11 +188,7 @@ export class SyncManager {
   private async syncExpenses(): Promise<void> {
     const trips = await tripDB.getAll()
     for (const trip of trips) {
-      const { data, error } = await supabase
-        .from('expenses')
-        .select('*')
-        .eq('trip_id', trip.id)
-        .order('created_at', { ascending: false })
+      const { data, error } = await dbApi.getExpenses(trip.id)
 
       if (error) {
         console.error('Error syncing expenses:', error)
@@ -222,11 +206,7 @@ export class SyncManager {
   private async syncNotes(): Promise<void> {
     const trips = await tripDB.getAll()
     for (const trip of trips) {
-      const { data, error } = await supabase
-        .from('notes')
-        .select('*')
-        .eq('trip_id', trip.id)
-        .order('updated_at', { ascending: false })
+      const { data, error } = await dbApi.getNotes(trip.id)
 
       if (error) {
         console.error('Error syncing notes:', error)

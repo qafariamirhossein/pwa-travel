@@ -48,14 +48,6 @@ export function BottomNav() {
                   )}>
                     <Icon className="h-5 w-5" />
                   </div>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
-                      initial={false}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    />
-                  )}
                 </motion.div>
                 <span className={cn(
                   'text-xs mt-1 font-medium transition-all duration-200',
