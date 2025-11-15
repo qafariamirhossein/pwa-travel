@@ -11,11 +11,13 @@
  */
 
 // In development, if VITE_API_URL is not set, use relative URLs (Vite will proxy to backend)
-// In production, use the provided API URL
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : '')
+// In production, use the provided API URL or relative URLs if on same domain
+// When VITE_API_URL is not set, we use relative URLs which work when frontend/backend are on same domain
+const API_URL = import.meta.env.VITE_API_URL || ''
 
-if (!API_URL && !import.meta.env.DEV) {
-  console.warn('API URL not configured. App will work in offline mode only.')
+// Only log info in dev mode, no warning needed in production when using relative URLs
+if (import.meta.env.DEV && !API_URL) {
+  console.log('Using relative API URLs (Vite proxy)')
 }
 
 interface ApiResponse<T> {

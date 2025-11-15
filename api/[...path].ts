@@ -43,6 +43,9 @@ function setCorsHeaders(res: VercelResponse) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Set JSON content type
+  res.setHeader('Content-Type', 'application/json')
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     setCorsHeaders(res)
@@ -53,7 +56,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const path = (req.query.path as string[]) || []
   const method = req.method
-  const pool = getPool()
+  
+  // Health check doesn't need database connection
+  if (path.length === 1 && path[0] === 'health' && method === 'GET') {
+    // Try to check database connection, but don't fail if it's not configured
+    let dbStatus = 'unknown'
+    try {
+      const pool = getPool()
+      await pool.query('SELECT NOW()')
+      dbStatus = 'connected'
+    } catch (error) {
+      dbStatus = 'disconnected'
+    }
+    
+    return res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      database: dbStatus
+    })
+  }
+  
+  // Initialize pool for other endpoints (this might throw if DATABASE_URL is missing)
+  let pool: pg.Pool
+  try {
+    pool = getPool()
+  } catch (error) {
+    console.error('Database pool initialization error:', error)
+    return res.status(500).json({ 
+      error: 'Database configuration error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    })
+  }
 
   try {
     // ============================================
@@ -258,11 +291,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path.length === 2 && path[0] === 'notes' && method === 'DELETE') {
       await pool.query('DELETE FROM notes WHERE id = $1', [path[1]])
       return res.json({ success: true })
-    }
-
-    // Health check - /api/health
-    if (path.length === 1 && path[0] === 'health' && method === 'GET') {
-      return res.json({ status: 'ok', timestamp: new Date().toISOString() })
     }
 
     // 404 for unmatched routes
