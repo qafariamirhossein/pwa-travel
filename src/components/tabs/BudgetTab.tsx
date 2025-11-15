@@ -259,6 +259,7 @@ export default function BudgetTab({ tripId }: BudgetTabProps) {
             </form>
           </CardContent>
         </Card>
+        </motion.div>
       )}
 
       {chartData.length > 0 && (
