@@ -10,6 +10,8 @@ import ItineraryTab from '@/components/tabs/ItineraryTab'
 import MapTab from '@/components/tabs/MapTab'
 import BudgetTab from '@/components/tabs/BudgetTab'
 import NotesTab from '@/components/tabs/NotesTab'
+import PackingTab from '@/components/tabs/PackingTab'
+import { WeatherWidget } from '@/components/WeatherWidget'
 import { formatDate } from '@/lib/utils'
 
 export default function TripDetail() {
@@ -142,31 +144,42 @@ export default function TripDetail() {
         </div>
       </div>
 
+      {/* Weather Widget */}
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
+        <WeatherWidget destination={trip.destination} />
+      </div>
+
       {/* Tabs Section */}
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6 bg-muted/50 backdrop-blur-sm p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-5 mb-6 bg-muted/50 backdrop-blur-sm p-1 rounded-xl">
             <TabsTrigger 
               value="itinerary" 
-              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all text-xs md:text-sm"
             >
               Itinerary
             </TabsTrigger>
             <TabsTrigger 
               value="map"
-              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all text-xs md:text-sm"
             >
               Map
             </TabsTrigger>
             <TabsTrigger 
               value="budget"
-              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all text-xs md:text-sm"
             >
               Budget
             </TabsTrigger>
             <TabsTrigger 
+              value="packing"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all text-xs md:text-sm"
+            >
+              Packing
+            </TabsTrigger>
+            <TabsTrigger 
               value="notes"
-              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all text-xs md:text-sm"
             >
               Notes
             </TabsTrigger>
@@ -188,6 +201,10 @@ export default function TripDetail() {
 
             <TabsContent value="budget" className="mt-0">
               <BudgetTab tripId={trip.id} />
+            </TabsContent>
+
+            <TabsContent value="packing" className="mt-0">
+              <PackingTab tripId={trip.id} />
             </TabsContent>
 
             <TabsContent value="notes" className="mt-0">

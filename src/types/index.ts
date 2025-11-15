@@ -57,3 +57,15 @@ export interface AppState {
   lastSyncTime: number | null
 }
 
+export interface PackingItem {
+  id: string
+  tripId: string
+  category: string
+  name: string
+  packed: boolean
+  quantity?: number
+  notes?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
