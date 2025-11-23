@@ -140,11 +140,27 @@ export default function NewTrip() {
                   type="url"
                   value={formData.coverPhoto}
                   onChange={(e) => setFormData({ ...formData, coverPhoto: e.target.value })}
-                  placeholder="https://example.com/image.jpg"
+                  placeholder="https://images.unsplash.com/photo-..."
                 />
                 <p className="text-xs text-muted-foreground">
-                  Add a beautiful cover image for your trip
+                  Add a beautiful cover image for your trip. You can use Unsplash or any image URL.
                 </p>
+                {formData.coverPhoto && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mt-3 rounded-lg overflow-hidden border-2 border-border"
+                  >
+                    <img
+                      src={formData.coverPhoto}
+                      alt="Preview"
+                      className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="200"%3E%3Crect fill="%23ddd" width="400" height="200"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="18" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3EImage not found%3C/text%3E%3C/svg%3E'
+                      }}
+                    />
+                  </motion.div>
+                )}
               </div>
 
               <div className="flex gap-4 pt-4">

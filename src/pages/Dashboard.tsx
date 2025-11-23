@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatDate, getDaysUntil, isOngoing, isUpcoming, formatCountdown, getDaysBetween } from '@/lib/utils'
 import { TravelTips } from '@/components/TravelTips'
+import SampleDataSeeder from '@/components/SampleDataSeeder'
 
 const gradients = [
   'from-blue-500 via-purple-500 to-pink-500',
@@ -288,16 +289,27 @@ export default function Dashboard() {
                     Create your first trip and begin planning your next adventure!
                   </p>
                 </div>
-                <Link to="/new-trip">
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button size="lg" className="mt-4">
-                      <Plus className="h-5 w-5 mr-2" />
-                      Create Your First Trip
-                    </Button>
-                  </motion.div>
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link to="/new-trip">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button size="lg" className="w-full sm:w-auto">
+                        <Plus className="h-5 w-5 mr-2" />
+                        Create Your First Trip
+                      </Button>
+                    </motion.div>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
+          </motion.div>
+
+          {/* Sample Data Seeder */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <SampleDataSeeder onComplete={() => fetchTrips()} />
           </motion.div>
 
           {/* Show Travel Tips even when no trips */}
